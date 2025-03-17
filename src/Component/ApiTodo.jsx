@@ -5,50 +5,57 @@ const TodoList = () => {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState("");
 
-  // Fetch todos
+  //  Updated: Fetch todos
   useEffect(() => {
     axios
-      .get("https://dummyjson.com/todos")
-      .then((response) => setTodos(response.data.todos))
+      .get("https://todoapp.free.beeceptor.com/todos")
+      .then((response) => setTodos(response.data))
       .catch((error) => console.error("Error fetching todos:", error));
   }, []);
 
-  // Add a new todo
+  //  Updated: Add a new todo
   const addTodo = () => {
     if (newTodo.trim() === "") return;
 
+    const newTodoData = {
+      id: Date.now(), // Beeceptor doesn't auto-generate id
+      todo: newTodo,
+      completed:false,
+    };
+
     axios
-      .post("https://dummyjson.com/todos/add", {
-        todo: newTodo,
-        completed: false,
-        userId: 1,
-      })
-      .then((response) => {
-        setTodos([...todos, response.data]);
+      .post("https://todoapp.free.beeceptor.com/todos", newTodoData)
+      .then(() => {
+        setTodos([...todos, newTodoData]); // Update local list
         setNewTodo("");
       })
       .catch((error) => console.error("Error adding todo:", error));
   };
 
-  // Delete a todo
+  // Updated: Delete a todo
   const deleteTodo = (id) => {
     axios
-      .delete(`https://dummyjson.com/todos/${id}`)
+      .delete(`https://todoapp.free.beeceptor.com/todos/${id}`)
       .then(() => setTodos(todos.filter((todo) => todo.id !== id)))
       .catch((error) => console.error("Error deleting todo:", error));
   };
 
-  // Toggle completion status
+  // Updated: Toggle complete (PUT request)
   const toggleComplete = (id) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
+    const updatedTodos = todos.map((todo) =>
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
     );
+
+    const updatedTodo = updatedTodos.find((todo) => todo.id === id);
+
+    axios
+      .put(`https://todoapp.free.beeceptor.com/todos/${id}`, updatedTodo)
+      .then(() => setTodos(updatedTodos))
+      .catch((error) => console.error("Error updating todo:", error));
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-gray-100 rounded-lg  mt-10">
+    <div className=" mx-auto p-6 bg-gray-100 rounded-lg mt-10 mb-250 w-[1250px]">
       <h1 className="text-2xl font-bold text-center mb-4">To-Do App</h1>
 
       <div className="flex">
